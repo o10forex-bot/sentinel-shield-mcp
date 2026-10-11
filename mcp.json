@@ -1,0 +1,37 @@
+{
+  "name": "sentinel-shield-mcp",
+  "version": "0.1.0",
+  "description": "Autonomous machine-to-machine cybersecurity auditor and runtime command guard for AI agents with x402 payment support",
+  "author": "Sentinel Shield Core Team",
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "security",
+    "cwe-209",
+    "cwe-78",
+    "crypto-audit",
+    "x402",
+    "agentic-security"
+  ],
+  "payout_details": {
+    "protocol": "x402/1.0",
+    "recipient": "0x2821d6003ceE245C4997Ff908029aa0116177b69",
+    "network": "polygon",
+    "currency": "USDC",
+    "base_price_usdc": 0.10
+  },
+  "tools": [
+    {
+      "name": "audit_cwe_leakage",
+      "description": "Static AST audit of Python code detecting raw exception reflection (CWE-209), command injection (CWE-78), and hardcoded tokens."
+    },
+    {
+      "name": "verify_crypto_auth",
+      "description": "Validates Web3 HMAC session bearer tokens against tampering, missing expiration, and replay attacks."
+    },
+    {
+      "name": "sandbox_command_guard",
+      "description": "Pre-tool execution terminal guard blocking destructive bash commands (rm -rf, disk wiping, credential dumping)."
+    }
+  ]
+}

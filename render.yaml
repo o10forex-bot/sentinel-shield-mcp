@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: sentinel-shield-mcp
+    runtime: python
+    buildCommand: pip install -r requirements.txt && pip install -e . && pytest -v
+    startCommand: uvicorn sentinel_shield.remote_server:app --host 0.0.0.0 --port $PORT
+    plan: free
+    region: oregon
+    envVars:
+      - key: SENTINEL_PAYOUT_WALLET
+        value: "0x2821d6003ceE245C4997Ff908029aa0116177b69"
+      - key: SENTINEL_PAYOUT_NETWORK
+        value: "polygon"
+      - key: SENTINEL_PRICE_PER_AUDIT_USDC
+        value: "0.10"
+      - key: SENTINEL_ENFORCE_X402
+        value: "false"

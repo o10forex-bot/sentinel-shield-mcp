@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sentinel-shield-mcp"
+version = "0.1.0"
+description = "Machine-to-machine cybersecurity audit and runtime protection MCP server for AI agents"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Sentinel Shield Core Team" }
+]
+dependencies = [
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pynacl>=1.5.0",
+    "cryptography>=41.0.0",
+]
+
+[project.scripts]
+sentinel-shield-mcp = "sentinel_shield.server:main"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-v"
