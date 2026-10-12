@@ -1,6 +1,13 @@
 # 🛡️ Sentinel Shield MCP
 
+[![Smithery](https://smithery.ai/badge/@o10forex/sentinel-shield)](https://smithery.ai/servers/o10forex/sentinel-shield)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 **Autonomous Machine-to-Machine Cybersecurity Auditor & Pre-Tool Runtime Guard for AI Agents**
+
+> 📦 **Smithery Marketplace Listing**: [smithery.ai/servers/o10forex/sentinel-shield](https://smithery.ai/servers/o10forex/sentinel-shield)  
+> Install instantly with: `npx -y @smithery/cli install @o10forex/sentinel-shield --client claude`
+
 
 Sentinel Shield is an open-source Model Context Protocol (MCP) server designed to protect AI agent runtimes, CI/CD pipelines, and LLM code generation workflows from high-risk security flaws. Built with sub-millisecond AST static analysis and native **x402 (HTTP 402 Payment Required)** autonomous micropayments.
 
