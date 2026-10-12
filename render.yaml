@@ -14,4 +14,4 @@ services:
       - key: SENTINEL_PRICE_PER_AUDIT_USDC
         value: "0.10"
       - key: SENTINEL_ENFORCE_X402
-        value: "false"
+        value: "true"
