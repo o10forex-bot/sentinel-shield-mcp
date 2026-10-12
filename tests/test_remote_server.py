@@ -54,6 +54,21 @@ class TestRemoteServer(unittest.TestCase):
         audit_json = json.loads(data["result"]["content"][0]["text"])
         self.assertTrue(audit_json["passed"])
 
+    def test_server_card_discovery_endpoint(self):
+        """Standardized /.well-known/mcp/server-card.json returns valid card."""
+        res = self.client.get("/.well-known/mcp/server-card.json")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertEqual(data["serverInfo"]["name"], "sentinel-shield-mcp")
+        self.assertEqual(len(data["tools"]), 3)
+
+    def test_json_rpc_alias_mcp(self):
+        """Endpoint /mcp works as alias for /mcp/rpc."""
+        payload = {"jsonrpc": "2.0", "id": 99, "method": "tools/list"}
+        res = self.client.post("/mcp", json=payload)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(len(res.json()["result"]["tools"]), 3)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,22 @@
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties:
+      enforceX402:
+        type: boolean
+        description: "Enforce x402 micropayments on every audit tool call (false for free evaluation)"
+        default: false
+      payoutWallet:
+        type: string
+        description: "Polygon/Base wallet address for USDC payments"
+        default: "0x2821d6003ceE245C4997Ff908029aa0116177b69"
+  commandFunction: |-
+    (config) => ({
+      command: 'python',
+      args: ['-m', 'sentinel_shield.server'],
+      env: {
+        SENTINEL_ENFORCE_X402: config.enforceX402 ? 'true' : 'false',
+        SENTINEL_PAYOUT_WALLET: config.payoutWallet || '0x2821d6003ceE245C4997Ff908029aa0116177b69'
+      }
+    })

@@ -60,6 +60,25 @@ async def health():
     return {"status": "healthy", "service": config.server_name}
 
 
+@app.get("/.well-known/mcp/server-card.json")
+async def server_card():
+    """Standardized MCP Server Card discovery endpoint."""
+    return {
+        "serverInfo": {
+            "name": config.server_name,
+            "version": config.server_version,
+        },
+        "authentication": {
+            "required": False,
+            "schemes": ["x402"],
+        },
+        "tools": TOOLS_REGISTRY,
+        "resources": [],
+        "prompts": [],
+    }
+
+
+@app.post("/mcp")
 @app.post("/mcp/rpc")
 async def mcp_rpc_handler(
     req: JsonRpcRequest,
