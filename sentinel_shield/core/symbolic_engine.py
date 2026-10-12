@@ -128,6 +128,30 @@ class SymbolicAnalyzer:
         return res
 
     @classmethod
+    def audit_all_invariants(cls, source_code: str) -> List[SymbolicAuditResult]:
+        """Audit all function definitions in source code against financial invariants."""
+        try:
+            tree = ast.parse(source_code)
+        except SyntaxError:
+            return []
+
+        results: List[SymbolicAuditResult] = []
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef):
+                bal_res = cls._verify_non_negative_balance(node)
+                if not bal_res.passed and bal_res.counterexample:
+                    results.append(bal_res)
+
+                fee_res = cls._verify_fee_non_zero(node)
+                if not fee_res.passed and fee_res.counterexample:
+                    results.append(fee_res)
+
+                auth_res = cls._verify_strict_auth_binding(node)
+                if not auth_res.passed and auth_res.counterexample:
+                    results.append(auth_res)
+        return results
+
+    @classmethod
     def _verify_non_negative_balance(cls, func: ast.FunctionDef) -> SymbolicAuditResult:
         """Verify that withdrawal/decrement operations enforce balance >= amount."""
         has_subtraction = False

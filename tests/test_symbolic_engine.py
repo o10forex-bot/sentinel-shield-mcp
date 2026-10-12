@@ -134,6 +134,23 @@ def authorize_action(caller: str) -> bool:
         self.assertFalse(result.passed)
         self.assertIn("No matching function definition found", result.summary)
 
+    def test_audit_all_invariants_multiple_functions(self):
+        multi_code = """
+def bad_withdraw(amount):
+    balance -= amount
+
+def bad_fee(amount, rate):
+    return (rate // 10000) * amount
+
+def safe_func(x):
+    return x * 2
+"""
+        violations = SymbolicAnalyzer.audit_all_invariants(multi_code)
+        self.assertEqual(len(violations), 2)
+        func_names = [v.target_function for v in violations]
+        self.assertIn("bad_withdraw", func_names)
+        self.assertIn("bad_fee", func_names)
+
 
 if __name__ == "__main__":
     unittest.main()
