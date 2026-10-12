@@ -20,6 +20,7 @@ class TestRemoteServer(unittest.TestCase):
         self.assertEqual(data["service"], "sentinel-shield-mcp")
         self.assertEqual(data["payout_wallet"], "0x2821d6003ceE245C4997Ff908029aa0116177b69")
         self.assertIn("audit_cwe_leakage", data["tools_available"])
+        self.assertIn("symbolic_audit_invariant", data["tools_available"])
 
     def test_json_rpc_tools_list(self):
         """JSON-RPC method tools/list returns tools array."""
@@ -32,7 +33,7 @@ class TestRemoteServer(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         data = res.json()
         self.assertEqual(data["id"], 1)
-        self.assertEqual(len(data["result"]["tools"]), 3)
+        self.assertEqual(len(data["result"]["tools"]), 4)
 
     def test_json_rpc_tools_call(self):
         """Remote agent calling audit_cwe_leakage via HTTP receives audit result."""
@@ -54,20 +55,42 @@ class TestRemoteServer(unittest.TestCase):
         audit_json = json.loads(data["result"]["content"][0]["text"])
         self.assertTrue(audit_json["passed"])
 
+    def test_json_rpc_symbolic_audit_call(self):
+        """Remote agent calling symbolic_audit_invariant via HTTP receives mathematical proof."""
+        payload = {
+            "jsonrpc": "2.0",
+            "id": 43,
+            "method": "tools/call",
+            "params": {
+                "name": "symbolic_audit_invariant",
+                "arguments": {
+                    "source_code": "def withdraw(amount):\n    balance -= amount",
+                    "invariant": "non_negative_balance",
+                },
+            },
+        }
+        res = self.client.post("/mcp/rpc", json=payload)
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertEqual(data["id"], 43)
+        res_json = json.loads(data["result"]["content"][0]["text"])
+        self.assertFalse(res_json["passed"])
+        self.assertIsNotNone(res_json["counterexample"])
+
     def test_server_card_discovery_endpoint(self):
         """Standardized /.well-known/mcp/server-card.json returns valid card."""
         res = self.client.get("/.well-known/mcp/server-card.json")
         self.assertEqual(res.status_code, 200)
         data = res.json()
         self.assertEqual(data["serverInfo"]["name"], "sentinel-shield-mcp")
-        self.assertEqual(len(data["tools"]), 3)
+        self.assertEqual(len(data["tools"]), 4)
 
     def test_json_rpc_alias_mcp(self):
         """Endpoint /mcp works as alias for /mcp/rpc."""
         payload = {"jsonrpc": "2.0", "id": 99, "method": "tools/list"}
         res = self.client.post("/mcp", json=payload)
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(len(res.json()["result"]["tools"]), 3)
+        self.assertEqual(len(res.json()["result"]["tools"]), 4)
 
 
 if __name__ == "__main__":

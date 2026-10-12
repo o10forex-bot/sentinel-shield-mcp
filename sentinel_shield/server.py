@@ -14,6 +14,7 @@ from sentinel_shield.config import config
 from sentinel_shield.core.ast_visitor import scan_source_code
 from sentinel_shield.core.command_guard import audit_shell_command
 from sentinel_shield.core.crypto_guard import audit_session_token_security
+from sentinel_shield.core.symbolic_engine import SymbolicAnalyzer, InvariantType
 from sentinel_shield.payments.x402_middleware import evaluate_x402_payment
 
 # Specification of Tools exposed to other AI Agents
@@ -90,6 +91,40 @@ TOOLS_REGISTRY = [
             "required": ["command"],
         },
     },
+    {
+        "name": "symbolic_audit_invariant",
+        "description": (
+            "Formal verification and symbolic constraint solver for financial state machines and smart contracts. "
+            "Mathematically proves invariant satisfaction (non_negative_balance, fee_non_zero, strict_auth_binding, "
+            "balance_conservation) and returns concrete counterexample assignments on violation."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "source_code": {
+                    "type": "string",
+                    "description": "Python source code of the contract or financial module to audit",
+                },
+                "invariant": {
+                    "type": "string",
+                    "description": (
+                        "Invariant property to formally verify. One of: "
+                        "'non_negative_balance', 'fee_non_zero', 'strict_auth_binding', 'balance_conservation'"
+                    ),
+                    "default": "non_negative_balance",
+                },
+                "function_name": {
+                    "type": "string",
+                    "description": "Optional name of the target function to verify",
+                },
+                "payment_proof": {
+                    "type": "string",
+                    "description": "Optional x402 payment proof",
+                },
+            },
+            "required": ["source_code"],
+        },
+    },
 ]
 
 
@@ -143,6 +178,20 @@ def handle_tool_call(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
                 {
                     "type": "text",
                     "text": json.dumps(result.model_dump(), indent=2),
+                }
+            ]
+        }
+
+    elif name == "symbolic_audit_invariant":
+        code = arguments.get("source_code", "")
+        invariant = arguments.get("invariant", InvariantType.NON_NEGATIVE_BALANCE.value)
+        func_name = arguments.get("function_name")
+        result = SymbolicAnalyzer.audit_invariant(code, invariant, func_name)
+        return {
+            "content": [
+                {
+                    "type": "text",
+                    "text": json.dumps(result.to_dict(), indent=2),
                 }
             ]
         }

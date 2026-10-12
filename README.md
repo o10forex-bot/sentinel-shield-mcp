@@ -32,6 +32,11 @@ Sentinel Shield is an open-source Model Context Protocol (MCP) server designed t
    - Blocks credential dumps (`cat .env`, `cat ~/.ssh/id_rsa`).
    - Blocks unverified remote script piping (`curl ... | bash`) and interactive reverse shells.
 
+4. **`symbolic_audit_invariant`**
+   - Formal verification and symbolic constraint solver for financial state machines, smart contracts, and Web3 engines.
+   - Mathematically verifies safety invariants: `non_negative_balance`, `fee_non_zero`, `strict_auth_binding`, and `balance_conservation`.
+   - Generates concrete counterexample assignments and execution traces on invariant violation, eliminating false positives and yielding mathematical proofs for bug bounties.
+
 ---
 
 ## 💳 Autonomous M2M Payments (Protocol x402)

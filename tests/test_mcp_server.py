@@ -11,16 +11,29 @@ class TestMCPServer(unittest.TestCase):
 
     def test_tools_registry_structure(self):
         """All registered tools must conform to MCP tool specification with inputSchema."""
-        self.assertEqual(len(TOOLS_REGISTRY), 3)
+        self.assertEqual(len(TOOLS_REGISTRY), 4)
         tool_names = [t["name"] for t in TOOLS_REGISTRY]
         self.assertIn("audit_cwe_leakage", tool_names)
         self.assertIn("verify_crypto_auth", tool_names)
         self.assertIn("sandbox_command_guard", tool_names)
+        self.assertIn("symbolic_audit_invariant", tool_names)
 
         for tool in TOOLS_REGISTRY:
             self.assertIn("description", tool)
             self.assertIn("inputSchema", tool)
             self.assertEqual(tool["inputSchema"]["type"], "object")
+
+    def test_call_symbolic_audit_invariant_tool(self):
+        """Executing symbolic_audit_invariant returns formal verification result."""
+        args = {
+            "source_code": "def withdraw(amount):\n    balance -= amount",
+            "invariant": "non_negative_balance",
+        }
+        res = handle_tool_call("symbolic_audit_invariant", args)
+        self.assertNotIn("isError", res)
+        data = json.loads(res["content"][0]["text"])
+        self.assertFalse(data["passed"])
+        self.assertIn("counterexample", data)
 
     def test_call_audit_cwe_tool(self):
         """Executing audit_cwe_leakage tool returns structured JSON audit result."""
