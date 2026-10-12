@@ -109,6 +109,27 @@ async def mcp_rpc_handler(
             "result": {"tools": TOOLS_REGISTRY},
         }
 
+    if method == "resources/list":
+        return {
+            "jsonrpc": "2.0",
+            "id": req.id,
+            "result": {"resources": []},
+        }
+
+    if method == "prompts/list":
+        return {
+            "jsonrpc": "2.0",
+            "id": req.id,
+            "result": {"prompts": []},
+        }
+
+    if method == "ai.smithery/events/list":
+        return {
+            "jsonrpc": "2.0",
+            "id": req.id,
+            "result": {"events": []},
+        }
+
     if method == "tools/call":
         tool_name = params.get("name", "")
         args = params.get("arguments", {})
