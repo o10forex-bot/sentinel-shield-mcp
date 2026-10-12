@@ -38,7 +38,37 @@ In permissive mode (`SENTINEL_ENFORCE_X402=false`), local development and hermet
 
 ---
 
-## 🚀 Quickstart & IDE Configuration
+## 🌐 Live Cloud MCP Gateway (Zero Local Installation)
+
+Sentinel Shield is deployed and running live 24/7 in the cloud:
+- **Public Gateway**: `https://sentinel-shield-mcp.onrender.com`
+- **Health Check**: `https://sentinel-shield-mcp.onrender.com/health`
+- **MCP RPC Endpoint**: `https://sentinel-shield-mcp.onrender.com/mcp/rpc`
+- **Interactive OpenAPI Docs**: `https://sentinel-shield-mcp.onrender.com/docs`
+
+### Connect Claude Desktop / Cursor Directly to the Cloud
+Any external AI agent can connect to Sentinel Shield over the internet with zero local dependencies:
+
+```json
+{
+  "mcpServers": {
+    "sentinel-shield-cloud": {
+      "url": "https://sentinel-shield-mcp.onrender.com/mcp/rpc"
+    }
+  }
+}
+```
+
+Or via direct HTTP JSON-RPC 2.0:
+```bash
+curl -X POST https://sentinel-shield-mcp.onrender.com/mcp/rpc \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": {}}'
+```
+
+---
+
+## 🚀 Local Installation & Development
 
 ### 1. Installation
 ```bash
@@ -46,9 +76,7 @@ cd sentinel_shield_mcp
 pip install -e .
 ```
 
-### 2. Connect to Claude Desktop / Cursor
-Add to your `claude_desktop_config.json` or Cursor MCP settings:
-
+### 2. Connect via Stdio
 ```json
 {
   "mcpServers": {
