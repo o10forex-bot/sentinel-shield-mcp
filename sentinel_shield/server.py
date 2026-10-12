@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional
 
 from sentinel_shield.config import config
 from sentinel_shield.core.ast_visitor import scan_source_code
+from sentinel_shield.core.bytecode_engine import BytecodeConcolicEngine
 from sentinel_shield.core.command_guard import audit_shell_command
 from sentinel_shield.core.crypto_guard import audit_session_token_security
 from sentinel_shield.core.symbolic_engine import SymbolicAnalyzer, InvariantType
@@ -125,6 +126,28 @@ TOOLS_REGISTRY = [
             "required": ["source_code"],
         },
     },
+    {
+        "name": "bytecode_concolic_audit",
+        "description": (
+            "Low-level virtual machine bytecode disassembler and algebraic interval constraint solver. "
+            "Reconstructs the Control Flow Graph (CFG) at opcode level, simulates stack mutations, "
+            "and discovers exact branch counterexamples using interval algebra ([a, b] ⊖ [c, d])."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "source_code": {
+                    "type": "string",
+                    "description": "Python source code of functions to compile and analyze at bytecode opcode level",
+                },
+                "payment_proof": {
+                    "type": "string",
+                    "description": "Optional x402 payment proof",
+                },
+            },
+            "required": ["source_code"],
+        },
+    },
 ]
 
 
@@ -192,6 +215,18 @@ def handle_tool_call(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
                 {
                     "type": "text",
                     "text": json.dumps(result.to_dict(), indent=2),
+                }
+            ]
+        }
+
+    elif name == "bytecode_concolic_audit":
+        code = arguments.get("source_code", "")
+        results = BytecodeConcolicEngine.audit_source_code(code)
+        return {
+            "content": [
+                {
+                    "type": "text",
+                    "text": json.dumps([r.to_dict() for r in results], indent=2),
                 }
             ]
         }

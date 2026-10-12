@@ -21,6 +21,7 @@ class TestRemoteServer(unittest.TestCase):
         self.assertEqual(data["payout_wallet"], "0x2821d6003ceE245C4997Ff908029aa0116177b69")
         self.assertIn("audit_cwe_leakage", data["tools_available"])
         self.assertIn("symbolic_audit_invariant", data["tools_available"])
+        self.assertIn("bytecode_concolic_audit", data["tools_available"])
 
     def test_json_rpc_tools_list(self):
         """JSON-RPC method tools/list returns tools array."""
@@ -33,7 +34,28 @@ class TestRemoteServer(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         data = res.json()
         self.assertEqual(data["id"], 1)
-        self.assertEqual(len(data["result"]["tools"]), 4)
+        self.assertEqual(len(data["result"]["tools"]), 5)
+
+    def test_json_rpc_bytecode_concolic_call(self):
+        """Remote agent calling bytecode_concolic_audit receives opcode analysis."""
+        payload = {
+            "jsonrpc": "2.0",
+            "id": 88,
+            "method": "tools/call",
+            "params": {
+                "name": "bytecode_concolic_audit",
+                "arguments": {
+                    "source_code": "def withdraw(bal, amt): return bal - amt",
+                },
+            },
+        }
+        res = self.client.post("/mcp/rpc", json=payload)
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertEqual(data["id"], 88)
+        content_json = json.loads(data["result"]["content"][0]["text"])
+        self.assertFalse(content_json[0]["passed"])
+        self.assertTrue(content_json[0]["total_opcodes"] > 0)
 
     def test_json_rpc_tools_call(self):
         """Remote agent calling audit_cwe_leakage via HTTP receives audit result."""
@@ -83,14 +105,14 @@ class TestRemoteServer(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         data = res.json()
         self.assertEqual(data["serverInfo"]["name"], "sentinel-shield-mcp")
-        self.assertEqual(len(data["tools"]), 4)
+        self.assertEqual(len(data["tools"]), 5)
 
     def test_json_rpc_alias_mcp(self):
         """Endpoint /mcp works as alias for /mcp/rpc."""
         payload = {"jsonrpc": "2.0", "id": 99, "method": "tools/list"}
         res = self.client.post("/mcp", json=payload)
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(len(res.json()["result"]["tools"]), 4)
+        self.assertEqual(len(res.json()["result"]["tools"]), 5)
 
 
 if __name__ == "__main__":

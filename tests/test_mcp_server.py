@@ -11,17 +11,28 @@ class TestMCPServer(unittest.TestCase):
 
     def test_tools_registry_structure(self):
         """All registered tools must conform to MCP tool specification with inputSchema."""
-        self.assertEqual(len(TOOLS_REGISTRY), 4)
+        self.assertEqual(len(TOOLS_REGISTRY), 5)
         tool_names = [t["name"] for t in TOOLS_REGISTRY]
         self.assertIn("audit_cwe_leakage", tool_names)
         self.assertIn("verify_crypto_auth", tool_names)
         self.assertIn("sandbox_command_guard", tool_names)
         self.assertIn("symbolic_audit_invariant", tool_names)
+        self.assertIn("bytecode_concolic_audit", tool_names)
 
         for tool in TOOLS_REGISTRY:
             self.assertIn("description", tool)
             self.assertIn("inputSchema", tool)
             self.assertEqual(tool["inputSchema"]["type"], "object")
+
+    def test_call_bytecode_concolic_audit_tool(self):
+        """Executing bytecode_concolic_audit returns low-level opcode audit."""
+        args = {"source_code": "def drain(b, a):\n    return b - a"}
+        res = handle_tool_call("bytecode_concolic_audit", args)
+        self.assertNotIn("isError", res)
+        data = json.loads(res["content"][0]["text"])
+        self.assertEqual(len(data), 1)
+        self.assertFalse(data[0]["passed"])
+        self.assertTrue(data[0]["total_opcodes"] > 0)
 
     def test_call_symbolic_audit_invariant_tool(self):
         """Executing symbolic_audit_invariant returns formal verification result."""

@@ -154,20 +154,30 @@ class SymbolicAnalyzer:
     @classmethod
     def _verify_non_negative_balance(cls, func: ast.FunctionDef) -> SymbolicAuditResult:
         """Verify that withdrawal/decrement operations enforce balance >= amount."""
+        financial_terms = ("balance", "amount", "fund", "credit", "token", "reserve", "stake", "deposit", "withdraw", "supply", "coins", "asset")
         has_subtraction = False
         has_bounds_check = False
         sub_var = None
 
+        def is_financial_node(n: ast.AST) -> bool:
+            if isinstance(n, ast.Name):
+                return any(term in n.id.lower() for term in financial_terms)
+            elif isinstance(n, ast.Attribute):
+                return any(term in n.attr.lower() for term in financial_terms)
+            return False
+
         for node in ast.walk(func):
             # Check for balance - amount or balance -= amount
             if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Sub):
-                has_subtraction = True
-                if isinstance(node.right, ast.Name):
-                    sub_var = node.right.id
+                if is_financial_node(node.left) or is_financial_node(node.right):
+                    has_subtraction = True
+                    if isinstance(node.right, ast.Name):
+                        sub_var = node.right.id
             elif isinstance(node, ast.AugAssign) and isinstance(node.op, ast.Sub):
-                has_subtraction = True
-                if isinstance(node.value, ast.Name):
-                    sub_var = node.value.id
+                if is_financial_node(node.target) or is_financial_node(node.value):
+                    has_subtraction = True
+                    if isinstance(node.value, ast.Name):
+                        sub_var = node.value.id
 
             # Check for if amount > balance: raise ... or if balance < amount
             if isinstance(node, ast.If):
