@@ -78,6 +78,15 @@ async def server_card():
     }
 
 
+@app.get("/.well-known/glama.json")
+async def glama_verification():
+    """Glama.ai domain verification endpoint."""
+    return {
+        "$schema": "https://glama.ai/mcp/schemas/server.json",
+        "maintainers": ["o10forex-bot"],
+    }
+
+
 @app.post("/mcp")
 @app.post("/mcp/rpc")
 async def mcp_rpc_handler(
